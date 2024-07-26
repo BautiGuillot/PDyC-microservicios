@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  config:
+    import: optional:configserver:http://localhost:8888
+  application:
+    name: msvc-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: user
+          uri: http://localhost:8090
+          predicates:
+            - Path=/users/**
+        - id: login
+          uri: http://localhost:8090
+          predicates:
+            - Path=/login
+        - id: song
+          uri: http://localhost:9091
+          predicates:
+            - Path=/songs/**
+        - id: playlist
+          uri: http://localhost:9090
+          predicates:
+            - Path=/playlists/**
