@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "msvc-song", url = "http://localhost:9091")
+@FeignClient(name = "msvc-song", url = "http://localhost:8080")
 public interface SongClient {
     @GetMapping("/songs/{id}")
     SongDTO getSongById(@PathVariable("id") Long id); //obtener una cancion por id de la base de datos de canciones (msvc-song)
