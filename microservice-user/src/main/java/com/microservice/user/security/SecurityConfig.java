@@ -38,13 +38,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .userDetailsService(userDetailsService)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET,"/songs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/playlists/**").permitAll()
-                        .anyRequest().fullyAuthenticated())
                 .addFilter(new JWTAuthenticationFilter
-                        (authenticationConfiguration.getAuthenticationManager()))
-                .addFilter(new JWTAuthorizationFilter
                         (authenticationConfiguration.getAuthenticationManager()));
         return http.build();
     }

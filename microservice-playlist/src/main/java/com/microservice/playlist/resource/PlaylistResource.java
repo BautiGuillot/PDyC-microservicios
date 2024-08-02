@@ -6,9 +6,11 @@ import com.microservice.playlist.dto.SongDTO;
 import com.microservice.playlist.model.Playlist;
 import com.microservice.playlist.service.PlaylistService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 //import org.springframework.security.core.Authentication;
 //import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -39,18 +41,20 @@ public class PlaylistResource {
         playlistInfo.setSongCount(playlist.getSongIds().size());
         return playlistInfo;
     }
-}
 
-//    //crear una playlist
-//    @POST
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    public Response createPlaylist(PlaylistDTO playlistDTO) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); //obtener el usuario autenticado
-//        String mail = authentication.getName(); //obtener el nombre del usuario autenticado (mail)
-//        playlistService.createPlaylist(playlistDTO.getName(), mail); //crear la playlist con el nombre y el propietario
-//        return Response.status(Response.Status.CREATED).build();
-//    }
-//
+    // Crear una playlist
+    @PostMapping
+    public Mono<ResponseEntity<Void>> createPlaylist(@RequestBody PlaylistDTO playlistDTO) {
+        //quiero ver si llego aca
+        System.out.println("usuario:" + ReactiveSecurityContextHolder.getContext());
+        return ReactiveSecurityContextHolder.getContext()  // Obtener el contexto de seguridad para obtener el usuario autenticado (mail)
+                .map(context -> context.getAuthentication().getName()) // Obtener el nombre del usuario autenticado (mail)
+                .flatMap(mail -> { // Crear la playlist con el nombre y el propietario
+                    playlistService.createPlaylist(playlistDTO.getName(), mail); // Crear la playlist con el nombre y el propietario
+                    return Mono.just(new ResponseEntity<>(HttpStatus.CREATED)); // Devolver una respuesta con estado 201
+                });
+    }
+
 //    //agregar una cancion a una playlist el id de la playlist se pasa por parametro en la URL y el id de la cancion se pasa en el body
 //    @POST
 //    @Path("/{id}/songs/")
@@ -122,4 +126,5 @@ public class PlaylistResource {
 //        return Response.ok(playlistsInfo).build();                  //devolver la lista de PlaylistDTO
 //
 //    }
+}
 
