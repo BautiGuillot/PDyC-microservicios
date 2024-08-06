@@ -65,16 +65,17 @@ public class PlaylistResource {
                     return Mono.just(new ResponseEntity<Void>(HttpStatus.CREATED));
                 });
     }
-//
-//    //eliminar una canción de una playlist
-//    @DELETE
-//    @Path("/{id}/songs/{song_id}")
-//    public Response removeSongFromPlaylistRes(@PathParam("id") Long playlistId, @PathParam("song_id") Long songId) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); //obtener el usuario autenticado
-//        String mail = authentication.getName(); //obtener el nombre del usuario autenticado (mail)
-//        playlistService.removeSongFromPlaylist(songId, playlistId, mail);
-//        return Response.status(Response.Status.OK).build();
-//    }
+
+    //eliminar una canción de una playlist
+    @DeleteMapping("/{id}/songs/{song_id}")
+    public Mono<ResponseEntity<Void>> removeSongFromPlaylist(@PathVariable("id") Long playlistId, @PathVariable("song_id") Long songId) {
+        return getAuthenticatedUserEmail()
+                .flatMap(mail -> {
+                    System.out.println("Usuario autenticado: " + mail);
+                    playlistService.removeSongFromPlaylist(songId, playlistId, mail);
+                    return Mono.just(new ResponseEntity<>(HttpStatus.OK));
+                });
+    }
 //
 //    //cambiar el nombre de una playlist por su id en la url y el nuevo nombre en el body
 //    @PUT
