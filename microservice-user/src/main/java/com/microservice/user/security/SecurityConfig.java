@@ -38,6 +38,9 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .userDetailsService(userDetailsService)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET,"/users/**").permitAll()
+                        .anyRequest().fullyAuthenticated())
                 .addFilter(new JWTAuthenticationFilter
                         (authenticationConfiguration.getAuthenticationManager()));
         return http.build();

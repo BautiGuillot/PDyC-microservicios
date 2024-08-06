@@ -23,6 +23,8 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET,"/songs/**").permitAll()
                         .pathMatchers(HttpMethod.POST,"/songs/**").permitAll()
                         .pathMatchers(HttpMethod.GET,"/playlists/**").permitAll()
+                        .pathMatchers(HttpMethod.POST,"/playlists/**").permitAll()
+                        .pathMatchers(HttpMethod.GET,"/users/**").permitAll()
                         .anyExchange().authenticated()) // se establece que cualquier otra petición requiere autenticación
                 .addFilterAt(new JWTAuthorizationFilter(), SecurityWebFiltersOrder.AUTHENTICATION); // se añade el filtro de autorización JWT
         return http.build();

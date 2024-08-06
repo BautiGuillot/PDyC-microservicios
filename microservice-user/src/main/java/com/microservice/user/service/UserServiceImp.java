@@ -16,9 +16,11 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        System.out.println("Buscando usuario por email: " + email);
         User user = repository.findByEmail(email);
         if (user == null)
             throw new UsernameNotFoundException("Usuario no encontrado");
+        System.out.println("Usuario encontrado: " + user);
         return user;
     }
 }

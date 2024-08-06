@@ -31,7 +31,8 @@ public class PlaylistServiceImp implements PlaylistService {
 
     @Override
     public void createPlaylist(String name, String mail) {
-        UserDTO owner = userClient.getUserByEmail(mail);
+        UserDTO owner = userClient.getUserByEmail(mail); //obtener el usuario autenticado por email, para luego contar con el id del usuario y asi poder crear la playlist con el id. Aqui consultamos el microservicio de usuarios para obtener el usuario autenticado
+        System.out.println("5 Usuario dueño de la playlist: " + owner);
         Playlist playlist = new Playlist(name, owner.getId());
         repository.save(playlist);
     }

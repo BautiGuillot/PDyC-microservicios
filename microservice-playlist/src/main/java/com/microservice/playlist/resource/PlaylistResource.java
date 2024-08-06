@@ -38,20 +38,22 @@ public class PlaylistResource {
         PlaylistDTO playlistInfo = new PlaylistDTO();
         playlistInfo.setId(playlist.getId());
         playlistInfo.setName(playlist.getName());
-        playlistInfo.setSongCount(playlist.getSongIds().size());
+        int numCantidadCanciones = playlist.getSongIds().size();
+        System.out.println("Cantidad de canciones: " + numCantidadCanciones);
+        playlistInfo.setSongCount(numCantidadCanciones);
         return playlistInfo;
     }
 
     // Crear una playlist
     @PostMapping
     public Mono<ResponseEntity<Void>> createPlaylist(@RequestBody PlaylistDTO playlistDTO) {
-        //quiero ver si llego aca
-        System.out.println("usuario:" + ReactiveSecurityContextHolder.getContext());
-        return ReactiveSecurityContextHolder.getContext()  // Obtener el contexto de seguridad para obtener el usuario autenticado (mail)
-                .map(context -> context.getAuthentication().getName()) // Obtener el nombre del usuario autenticado (mail)
-                .flatMap(mail -> { // Crear la playlist con el nombre y el propietario
-                    playlistService.createPlaylist(playlistDTO.getName(), mail); // Crear la playlist con el nombre y el propietario
-                    return Mono.just(new ResponseEntity<>(HttpStatus.CREATED)); // Devolver una respuesta con estado 201
+        return ReactiveSecurityContextHolder.getContext()
+                .doOnNext(context -> System.out.println("Contexto de Seguridad: " + context)) //imprimir el contexto de seguridad, esto es para verificar que el usuario autenticado es el correcto y se pueda asignar la playlist al usuario autenticado
+                .map(context -> context.getAuthentication().getName()) //obtener el nombre del usuario autenticado (mail)
+                .flatMap(mail -> {
+                    System.out.println("1 Usuario autenticado: " + mail);
+                    playlistService.createPlaylist(playlistDTO.getName(), mail);
+                    return Mono.just(new ResponseEntity<>(HttpStatus.CREATED));
                 });
     }
 
