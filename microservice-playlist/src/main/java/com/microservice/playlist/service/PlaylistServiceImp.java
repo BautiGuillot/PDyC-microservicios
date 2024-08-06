@@ -3,12 +3,10 @@ package com.microservice.playlist.service;
 
 import com.microservice.playlist.client.SongClient;
 import com.microservice.playlist.client.UserClient;
-import com.microservice.playlist.dto.SongDTO;
 import com.microservice.playlist.dto.UserDTO;
 import com.microservice.playlist.model.Playlist;
 import com.microservice.playlist.repository.PlaylistRepository;
 import jakarta.transaction.Transactional;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

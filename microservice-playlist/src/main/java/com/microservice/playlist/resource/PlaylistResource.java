@@ -76,17 +76,16 @@ public class PlaylistResource {
                     return Mono.just(new ResponseEntity<>(HttpStatus.OK));
                 });
     }
-//
-//    //cambiar el nombre de una playlist por su id en la url y el nuevo nombre en el body
-//    @PUT
-//    @Path("/{id}")
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    public Response updatePlaylist(@PathParam("id") Long id, String newName) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); //obtener el usuario autenticado
-//        String mail = authentication.getName(); //obtener el nombre del usuario autenticado (mail)
-//        playlistService.updatePlaylistName(id, newName, mail);
-//        return Response.status(Response.Status.OK).build();
-//    }
+
+    @PutMapping("/{id}")
+    public Mono<ResponseEntity<Void>> updatePlaylist(@PathVariable("id") Long id, @RequestBody String newName) {
+        return getAuthenticatedUserEmail()  // Obtener el correo electrónico del usuario autenticado
+                .flatMap(mail -> {  // Usar flatMap para encadenar la operación asíncrona
+                    System.out.println("Usuario autenticado: " + mail);
+                    playlistService.updatePlaylistName(id, newName, mail);  // Actualizar el nombre de la playlist
+                    return Mono.just(new ResponseEntity<Void>(HttpStatus.OK));  // Retornar una respuesta HTTP 200 OK
+                });
+    }
 //
 //    //consultar canciones de una playlist
 //    @GET
