@@ -26,31 +26,29 @@ public class PlaylistResource {
     private PlaylistService playlistService;
 
     @GetMapping
-    public List<PlaylistDTO> getPlaylists() {
+    public ResponseEntity<List<PlaylistDTO>> getPlaylists() {
         List<Playlist> playlists = playlistService.getPlaylists();
 
-        return playlists.stream()
+        List<PlaylistDTO> playlistsDTO = playlists.stream()
                 .map(this::mapToPlaylistInfo)
                 .collect(Collectors.toList());
+
+        return new ResponseEntity<>(playlistsDTO, HttpStatus.OK);
     }
 
     private PlaylistDTO mapToPlaylistInfo(Playlist playlist) {
         PlaylistDTO playlistInfo = new PlaylistDTO();
         playlistInfo.setId(playlist.getId());
         playlistInfo.setName(playlist.getName());
-        int numCantidadCanciones = playlist.getSongIds().size();
-        System.out.println("Cantidad de canciones: " + numCantidadCanciones);
-        playlistInfo.setSongCount(numCantidadCanciones);
+        playlistInfo.setSongCount(playlist.getSongIds().size());
         return playlistInfo;
     }
 
     // Crear una playlist
     @PostMapping
     public Mono<ResponseEntity<Void>> createPlaylist(@RequestBody PlaylistDTO playlistDTO) {
-        return ReactiveSecurityContextHolder.getContext()
-                .doOnNext(context -> System.out.println("Contexto de Seguridad: " + context)) //imprimir el contexto de seguridad, esto es para verificar que el usuario autenticado es el correcto y se pueda asignar la playlist al usuario autenticado
-                .map(context -> context.getAuthentication().getName()) //obtener el nombre del usuario autenticado (mail)
-                .flatMap(mail -> {
+        return getAuthenticatedUserEmail()
+                .flatMap(mail -> { //flatmap se utiliza para transformar el valor de un Mono en otro Mono y poder encadenar operaciones reactivas con el resultado del primer Mono (en este caso el mail del usuario autenticado) y el resultado del segundo Mono (en este caso la creación de la playlist)
                     System.out.println("1 Usuario autenticado: " + mail);
                     playlistService.createPlaylist(playlistDTO.getName(), mail);
                     return Mono.just(new ResponseEntity<>(HttpStatus.CREATED));
@@ -128,5 +126,10 @@ public class PlaylistResource {
 //        return Response.ok(playlistsInfo).build();                  //devolver la lista de PlaylistDTO
 //
 //    }
+
+    public static Mono<String> getAuthenticatedUserEmail() { //metodo para obtener el mail del usuario autenticado
+        return ReactiveSecurityContextHolder.getContext()
+                .map(context -> context.getAuthentication().getName());
+    }
 }
 

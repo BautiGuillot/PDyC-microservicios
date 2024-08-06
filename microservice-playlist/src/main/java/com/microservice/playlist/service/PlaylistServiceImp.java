@@ -101,11 +101,11 @@ public class PlaylistServiceImp implements PlaylistService {
 
     @Override
     public List<Playlist> getPlaylists() {
-        return repository.findAll();
+        return repository.findAllWithSongs();
     }
 
     @Override
-    public List<Long> getSongsFromPlaylist(Long playlistId) {
+    public List<Long> getSongsFromPlaylist(Long playlistId) { //consultar las canciones de una playlist
         // Obtener la playlist por ID
         Optional<Playlist> optionalPlaylist = repository.findById(playlistId);
 
@@ -121,6 +121,7 @@ public class PlaylistServiceImp implements PlaylistService {
     public Playlist getPlaylistByID(Long playlistId) {
         return repository.findById(playlistId).orElseThrow(() -> new RuntimeException("Playlist not found"));
     }
+
 
     @Override
     public List<Playlist> getPlaylistsByUser(String mail) {
