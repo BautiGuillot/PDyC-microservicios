@@ -55,16 +55,16 @@ public class PlaylistResource {
                 });
     }
 
-//    //agregar una cancion a una playlist el id de la playlist se pasa por parametro en la URL y el id de la cancion se pasa en el body
-//    @POST
-//    @Path("/{id}/songs/")
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    public Response addSongToPlaylistRes(@PathParam("id") Long playlistId, SongDTO songDTO) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); //obtener el usuario autenticado
-//        String mail = authentication.getName(); //obtener el nombre del usuario autenticado (mail)
-//        playlistService.addSongToPlaylist(songDTO.getId(), playlistId, mail);
-//        return Response.status(Response.Status.CREATED).build();
-//    }
+    //agregar una cancion a una playlist, el id de la playlist se pasa por parametro en la URL y el id de la cancion se pasa en el body
+    @PostMapping("/{id}/songs")
+    public Mono<ResponseEntity<Void>> addSongToPlaylist(@PathVariable("id") Long playlistId, @RequestBody SongDTO songDTO) {
+        return getAuthenticatedUserEmail()
+                .flatMap(mail -> {
+                    System.out.println("Usuario autenticado: " + mail);
+                    playlistService.addSongToPlaylist(songDTO.getId(), playlistId, mail);
+                    return Mono.just(new ResponseEntity<Void>(HttpStatus.CREATED));
+                });
+    }
 //
 //    //eliminar una canción de una playlist
 //    @DELETE
@@ -128,8 +128,8 @@ public class PlaylistResource {
 //    }
 
     public static Mono<String> getAuthenticatedUserEmail() { //metodo para obtener el mail del usuario autenticado
-        return ReactiveSecurityContextHolder.getContext()
-                .map(context -> context.getAuthentication().getName());
+        return ReactiveSecurityContextHolder.getContext() //obtener el contexto de seguridad reactiva (ReactiveSecurityContextHolder) y mapearlo a un Mono de tipo String con el nombre del usuario autenticado (mail)
+                .map(context -> context.getAuthentication().getName()); //obtener la autenticación del contexto y el nombre del usuario autenticado (mail) y mapearlo a un Mono de tipo String
     }
 }
 

@@ -53,8 +53,8 @@ public class PlaylistServiceImp implements PlaylistService {
     @Transactional
     @Override
     public void addSongToPlaylist(Long songId, Long playlistId, String mail) {
-        //SongDTO songDTO = songClient.getSongById(songId);
         Optional<Playlist> optionalPlaylist = repository.findById(playlistId); //buscar la playlist por id y guardarla en un optional para verificar si existe, en el optional se guarda la playlist si existe. Si no existe se guarda un null
+        System.out.println("usuario autenticado: " + mail);
         if (optionalPlaylist.isPresent()) { //si la playlist existe  isPresent() retorna true
             Playlist playlist = optionalPlaylist.get(); //obtener la playlist del optional y guardarla en una variable playlist para agregarle la cancion
             if (!isOwner(playlist, mail))
