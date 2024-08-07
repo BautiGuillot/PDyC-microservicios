@@ -24,12 +24,11 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(auth -> auth
-                        .pathMatchers(HttpMethod.POST, "/login").permitAll()
-                        .pathMatchers(HttpMethod.GET,"/songs/**").permitAll()
-                        .pathMatchers(HttpMethod.POST,"/songs/**").permitAll()
-                        .pathMatchers(HttpMethod.GET,"/playlists/**").permitAll()
-                        .pathMatchers(HttpMethod.POST,"/playlists/**").permitAll()
-                        .pathMatchers(HttpMethod.GET,"/users/**").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/login").permitAll() // se permite el acceso a la autenticación
+                        .pathMatchers(HttpMethod.GET,"/songs/**").permitAll() // se permite el acceso a la consulta de canciones
+                        .pathMatchers(HttpMethod.POST,"/songs/**").permitAll() // se permite el acceso a la creación de canciones, esto es para poder crear las canciones directamente en la bd, ya que desde front no se da la opcion
+                        .pathMatchers(HttpMethod.GET,"/playlists/**").permitAll() // se permite el acceso a la consulta de playlists
+                        .pathMatchers(HttpMethod.GET,"/users/**").permitAll() // se permite el acceso al endpoint de usuarios para que otro microservicio pueda consultar la información de un usuario
                         .anyExchange().authenticated()) // se establece que cualquier otra petición requiere autenticación
                 .addFilterAt(new JWTAuthorizationFilter(), SecurityWebFiltersOrder.AUTHENTICATION); // se añade el filtro de autorización JWT
         return http.build();
