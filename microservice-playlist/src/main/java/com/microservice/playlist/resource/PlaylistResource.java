@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-//import org.springframework.security.core.Authentication;
-//import org.springframework.security.core.context.SecurityContextHolder;
 
 
 import java.util.List;
@@ -27,10 +25,10 @@ public class PlaylistResource {
 
     @GetMapping
     public ResponseEntity<List<PlaylistDTO>> getPlaylists() {
-        List<Playlist> playlists = playlistService.getPlaylists();
+        List<Playlist> playlists = playlistService.getPlaylists(); //obtener todas las playlists
 
-        List<PlaylistDTO> playlistsDTO = playlists.stream()
-                .map(this::mapToPlaylistInfo)
+        List<PlaylistDTO> playlistsDTO = playlists.stream() //convertir la lista de playlists a una lista de PlaylistDTO
+                .map(this::mapToPlaylistInfo) //usando el metodo mapToPlaylistInfo que convierte una playlist a un PlaylistDTO
                 .collect(Collectors.toList());
 
         return new ResponseEntity<>(playlistsDTO, HttpStatus.OK);
@@ -53,6 +51,13 @@ public class PlaylistResource {
                     playlistService.createPlaylist(playlistDTO.getName(), mail);
                     return Mono.just(new ResponseEntity<>(HttpStatus.CREATED));
                 });
+    }
+
+    //consultar canciones de una playlist
+    @GetMapping("/{id}/songs")
+    public ResponseEntity<List<SongDTO>> getSongsFromPlaylist(@PathVariable("id") Long playlistId) {
+        List<SongDTO> songsInfo = playlistService.getSongsFromPlaylist(playlistId); // Obtener la lista de SongDTOs
+        return new ResponseEntity<>(songsInfo, HttpStatus.OK); // Devolver la lista de SongDTO
     }
 
     //agregar una cancion a una playlist, el id de la playlist se pasa por parametro en la URL y el id de la cancion se pasa en el body
@@ -86,46 +91,31 @@ public class PlaylistResource {
                     return Mono.just(new ResponseEntity<Void>(HttpStatus.OK));  // Retornar una respuesta HTTP 200 OK
                 });
     }
-//
-//    //consultar canciones de una playlist
-//    @GET
-//    @Path("/{id}/songs")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response getSongsFromPlaylist(@PathParam("id") Long playlistId) {
-//        List<Long> songIds = playlistService.getSongsFromPlaylist(playlistId); //obtener las IDs de las canciones de la playlist
-//
-//        List<SongDTO> songsInfo = songIds.stream() //convertir la lista de IDs a una lista de SongDTO usando el SongClient
-//                .map(songClient::getSongById) //usando el metodo getSongById del SongClient consultamos al microservicio de canciones por cada ID
-//                .collect(Collectors.toList());
-//        return Response.ok(songsInfo).build();
-//    }
-//
-//    //eliminar una playlist
-//    @DELETE
-//    @Path("/{id}")
-//    public Response deletePlaylist(@PathParam("id") Long id) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); //obtener el usuario autenticado
-//        String mail = authentication.getName(); //obtener el nombre del usuario autenticado (mail)
-//        playlistService.deletePlaylist(id, mail);
-//        return Response.status(Response.Status.OK).build();
-//    }
-//
-//    //consultar playlists de un usuario autenticado
-//    @GET
-//    @Path("/misPlaylists")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response getMyPlaylists() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); //obtener el usuario autenticado
-//        String mail = authentication.getName(); //obtener el nombre del usuario autenticado (mail)
-//        List<Playlist> playlists = playlistService.getPlaylistsByUser(mail);
-//
-//        List<PlaylistDTO> playlistsInfo = playlists.stream()        //convertir la lista de playlists a una lista de PlaylistDTO
-//                .map(this::mapToPlaylistInfo)                       //usando el metodo mapToPlaylistInfo
-//                .collect(Collectors.toList());                      //y coleccionando los resultados en una lista
-//
-//        return Response.ok(playlistsInfo).build();                  //devolver la lista de PlaylistDTO
-//
-//    }
+
+
+    //eliminar una playlist
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<Void>> deletePlaylist(@PathVariable("id") Long playlistId) {
+        return getAuthenticatedUserEmail()
+                .flatMap(mail -> {
+                    System.out.println("Usuario autenticado: " + mail);
+                    playlistService.deletePlaylist(playlistId, mail);
+                    return Mono.just(new ResponseEntity<>(HttpStatus.OK));
+                });
+    }
+
+    //consultar playlists de un usuario autenticado
+    @GetMapping("/misPlaylists")
+    public Mono<ResponseEntity<List<PlaylistDTO>>> getPlaylistsByUser() {
+        return getAuthenticatedUserEmail()
+                .flatMap(mail -> {
+                    List<Playlist> playlists = playlistService.getPlaylistsByUser(mail); //obtener las playlists del usuario autenticado
+                    List<PlaylistDTO> playlistsDTO = playlists.stream() //convertir la lista de playlists a una lista de PlaylistDTO
+                            .map(this::mapToPlaylistInfo) //usando el metodo mapToPlaylistInfo que convierte una playlist a un PlaylistDTO
+                            .collect(Collectors.toList());
+                    return Mono.just(new ResponseEntity<>(playlistsDTO, HttpStatus.OK));
+                });
+    }
 
     public static Mono<String> getAuthenticatedUserEmail() { //metodo para obtener el mail del usuario autenticado
         return ReactiveSecurityContextHolder.getContext() //obtener el contexto de seguridad reactiva (ReactiveSecurityContextHolder) y mapearlo a un Mono de tipo String con el nombre del usuario autenticado (mail)

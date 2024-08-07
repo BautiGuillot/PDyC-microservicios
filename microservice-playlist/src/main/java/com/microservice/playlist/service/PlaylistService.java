@@ -1,5 +1,6 @@
 package com.microservice.playlist.service;
 
+import com.microservice.playlist.dto.SongDTO;
 import com.microservice.playlist.model.Playlist;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public interface PlaylistService {
 
     List<Playlist> getPlaylists();
 
-    List<Long> getSongsFromPlaylist(Long playlistId);
+    List<SongDTO> getSongsFromPlaylist(Long playlistId);
 
     Playlist getPlaylistByID(Long playlistId);
 

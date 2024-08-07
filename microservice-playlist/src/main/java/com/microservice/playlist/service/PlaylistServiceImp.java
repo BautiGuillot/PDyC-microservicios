@@ -3,6 +3,7 @@ package com.microservice.playlist.service;
 
 import com.microservice.playlist.client.SongClient;
 import com.microservice.playlist.client.UserClient;
+import com.microservice.playlist.dto.SongDTO;
 import com.microservice.playlist.dto.UserDTO;
 import com.microservice.playlist.model.Playlist;
 import com.microservice.playlist.repository.PlaylistRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PlaylistServiceImp implements PlaylistService {
@@ -103,13 +105,18 @@ public class PlaylistServiceImp implements PlaylistService {
     }
 
     @Override
-    public List<Long> getSongsFromPlaylist(Long playlistId) { //consultar las canciones de una playlist
-        // Obtener la playlist por ID
-        Optional<Playlist> optionalPlaylist = repository.findById(playlistId);
-
+    public List<SongDTO> getSongsFromPlaylist(Long playlistId) {
+        Optional<Playlist> optionalPlaylist = repository.findByIdWithSongs(playlistId); //buscar las canciones que tiene la playlist por id
         if (optionalPlaylist.isPresent()) {
             Playlist playlist = optionalPlaylist.get();
-            return playlist.getSongIds();
+
+            // Inicializar la colección de songIds dentro de la transacción
+            List<Long> songIds = playlist.getSongIds();
+
+            // Por cada ID en songIds, ir a buscar al microservicio de canciones la canción con ese ID con todos sus datos
+            return songIds.stream()
+                    .map(songClient::getSongById) // Usar el cliente Feign para obtener cada canción por cada ID
+                    .collect(Collectors.toList()); // Colectar los resultados en una lista
         } else {
             throw new RuntimeException("Playlist not found");
         }
@@ -124,11 +131,11 @@ public class PlaylistServiceImp implements PlaylistService {
     @Override
     public List<Playlist> getPlaylistsByUser(String mail) {
         UserDTO user = userClient.getUserByEmail(mail);
-        return repository.findByOwnerId(user.getId());
+        return repository.findByOwnerIdWithSongs(user.getId());
     }
 
     private boolean isOwner(Playlist playlist, String mail) {
-        UserDTO owner = userClient.getUserByEmail(mail);
+        UserDTO owner = userClient.getUserByEmail(mail);  //obtener el usuario autenticado por email, para luego contar con el id del usuario y asi poder verificar si es el dueño de la playlist. Aqui consultamos el microservicio de usuarios para obtener el usuario autenticado
         return Objects.equals(playlist.getOwnerId(), owner.getId());
     }
 }
