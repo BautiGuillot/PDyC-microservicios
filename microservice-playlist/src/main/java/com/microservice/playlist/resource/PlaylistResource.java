@@ -83,11 +83,11 @@ public class PlaylistResource {
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<Void>> updatePlaylist(@PathVariable("id") Long id, @RequestBody String newName) {
+    public Mono<ResponseEntity<Void>> updatePlaylist(@PathVariable("id") Long id, @RequestBody PlaylistDTO playlistDTO ) { //actualizar el nombre de una playlist por id y el nuevo nombre se pasa en el body
         return getAuthenticatedUserEmail()  // Obtener el correo electrónico del usuario autenticado
                 .flatMap(mail -> {  // Usar flatMap para encadenar la operación asíncrona
                     System.out.println("Usuario autenticado: " + mail);
-                    playlistService.updatePlaylistName(id, newName, mail);  // Actualizar el nombre de la playlist
+                    playlistService.updatePlaylistName(id, playlistDTO.getName(), mail);  // Actualizar el nombre de la playlist
                     return Mono.just(new ResponseEntity<Void>(HttpStatus.OK));  // Retornar una respuesta HTTP 200 OK
                 });
     }
